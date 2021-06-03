@@ -13,7 +13,7 @@ from setuptools import Extension
 # If you need to change anything, it should be enough to change setup.cfg.
 
 PACKAGE_NAME = 'litesync'
-VERSION = '0.4.5'
+VERSION = '0.4.7'
 
 # define sqlite sources
 sources = [os.path.join('src', source)
@@ -38,6 +38,10 @@ def quote_argument(arg):
 define_macros = [('MODULE_NAME', quote_argument(PACKAGE_NAME + '.dbapi2'))]
 
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
 class SystemLibSqliteBuilder(build_ext):
     description = "Builds a C extension linking against the litesync library"
 
@@ -52,7 +56,8 @@ def get_setup_args():
         name=PACKAGE_NAME,
         version=VERSION,
         description="DB-API 2.0 interface for LiteSync",
-        long_description='',
+        long_description=long_description,
+        long_description_content_type="text/markdown",
         author="Bernardo Ramos",
         author_email="contact@litesync.io",
         license="zlib/libpng",
