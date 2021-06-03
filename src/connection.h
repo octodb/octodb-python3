@@ -31,7 +31,7 @@
 #include "cache.h"
 #include "module.h"
 
-#include "sqlcipher/sqlite3.h"
+#include "sqlite3.h"
 
 typedef struct
 {
