@@ -39,4 +39,5 @@ Optionally you can clone the repo and build it:
 git clone --depth=1 https://gitlab.com/octodb/octodb-python3
 cd octodb-python3
 python setup.py build
+python setup.py install
 ```
