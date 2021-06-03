@@ -43,7 +43,7 @@ with open("README.md", "r") as fh:
 
 
 class SystemLibSqliteBuilder(build_ext):
-    description = "Builds a C extension linking against the octodb library"
+    description = "Builds a C extension linking against the OctoDB library"
 
     def build_extension(self, ext):
         log.info(self.description)

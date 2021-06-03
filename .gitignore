@@ -1,5 +1,4 @@
-sqlcipher/sqlite3.h
 build/*
 dist/*
-sqlcipher3.egg-info/*
+octodb.egg-info/*
 _sqlite*.so
