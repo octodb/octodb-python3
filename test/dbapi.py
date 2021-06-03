@@ -23,10 +23,10 @@
 
 import threading
 import unittest
-from litesync import dbapi2 as sqlite
+from octodb import dbapi2 as sqlite
 
 #from test.support import TESTFN, unlink
-TESTFN = '/tmp/litesync_test'
+TESTFN = '/tmp/octodb_test'
 from os import unlink
 
 

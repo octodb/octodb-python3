@@ -1,4 +1,4 @@
-from litesync import dbapi2 as sqlite
+from octodb import dbapi2 as sqlite
 import unittest
 
 

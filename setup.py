@@ -12,7 +12,7 @@ from setuptools import Extension
 
 # If you need to change anything, it should be enough to change setup.cfg.
 
-PACKAGE_NAME = 'litesync'
+PACKAGE_NAME = 'octodb'
 VERSION = '0.4.8'
 
 # define sqlite sources
@@ -43,11 +43,11 @@ with open("README.md", "r") as fh:
 
 
 class SystemLibSqliteBuilder(build_ext):
-    description = "Builds a C extension linking against the litesync library"
+    description = "Builds a C extension linking against the octodb library"
 
     def build_extension(self, ext):
         log.info(self.description)
-        ext.libraries.append('litesync')
+        ext.libraries.append('octodb')
         build_ext.build_extension(self, ext)
 
 
@@ -55,15 +55,15 @@ def get_setup_args():
     return dict(
         name=PACKAGE_NAME,
         version=VERSION,
-        description="DB-API 2.0 interface for LiteSync",
+        description="DB-API 2.0 interface for OctoDB",
         long_description=long_description,
         long_description_content_type="text/markdown",
         author="Bernardo Ramos",
-        author_email="contact@litesync.io",
+        author_email="contact@octodb.io",
         license="zlib/libpng",
         platforms="ALL",
-        url="https://gitlab.com/litesync/litesync-python3",
-        package_dir={PACKAGE_NAME: "litesync"},
+        url="https://gitlab.com/octodb/octodb-python3",
+        package_dir={PACKAGE_NAME: "octodb"},
         packages=packages,
         ext_modules=[Extension(
             name=PACKAGE_NAME + EXTENSION_MODULE_NAME,

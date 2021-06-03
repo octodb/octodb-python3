@@ -1,5 +1,5 @@
 #-*- coding: ISO-8859-1 -*-
-# litesync/dbapi2.py: the DB-API 2.0 interface
+# octodb/dbapi2.py: the DB-API 2.0 interface
 #
 # Copyright (C) 2004-2005 Gerhard Häring <gh@ghaering.de>
 #
@@ -25,7 +25,7 @@ import datetime
 import time
 import collections.abc
 
-from litesync._sqlite3 import *
+from octodb._sqlite3 import *
 
 paramstyle = "qmark"
 

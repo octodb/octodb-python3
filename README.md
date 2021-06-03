@@ -1,7 +1,7 @@
-LiteSync for Python3
-====================
+OctoDB for Python3
+==================
 
-This is a wrapper library to use [LiteSync](http://litesync.io) on Python 3
+This is a wrapper library to use [OctoDB](http://octodb.io) on Python 3
 
 It is based on [pysqlite3](https://github.com/coleifer/pysqlite3)
 
@@ -19,15 +19,15 @@ It is based on [pysqlite3](https://github.com/coleifer/pysqlite3)
 Installation
 ------------
 
-You must install some LiteSync library for this one to work. It can be either
+You must install some OctoDB library for this one to work. It can be either
 pre-compiled binaries or you can compile it by yourself. You can start with
-the [free version](http://litesync.io/en/download.html).
+the [free version](http://octodb.io/en/download.html).
 
 
 ## Installing with pip
 
 ```
-pip install litesync
+pip install octodb
 ```
 
 
@@ -36,7 +36,7 @@ pip install litesync
 Optionally you can clone the repo and build it:
 
 ```
-git clone --depth=1 https://gitlab.com/litesync/litesync-python3
-cd litesync-python3
+git clone --depth=1 https://gitlab.com/octodb/octodb-python3
+cd octodb-python3
 python setup.py build
 ```

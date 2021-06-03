@@ -23,7 +23,7 @@
 
 import datetime
 import unittest
-from litesync import dbapi2 as sqlite
+from octodb import dbapi2 as sqlite
 try:
     import zlib
 except ImportError:

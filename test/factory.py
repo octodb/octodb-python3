@@ -22,7 +22,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 import unittest
-from litesync import dbapi2 as sqlite
+from octodb import dbapi2 as sqlite
 from collections.abc import Sequence
 
 class MyConnection(sqlite.Connection):

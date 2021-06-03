@@ -24,7 +24,7 @@
 import datetime
 import functools
 import unittest
-from litesync import dbapi2 as sqlite
+from octodb import dbapi2 as sqlite
 import weakref
 #from test import support
 

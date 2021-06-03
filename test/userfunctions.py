@@ -24,7 +24,7 @@
 
 import unittest
 import unittest.mock
-from litesync import dbapi2 as sqlite
+from octodb import dbapi2 as sqlite
 
 def func_returntext():
     return "foo"
