@@ -23,10 +23,10 @@
 
 import threading
 import unittest
-from sqlcipher3 import dbapi2 as sqlite
+from litesync import dbapi2 as sqlite
 
 #from test.support import TESTFN, unlink
-TESTFN = '/tmp/sqlcipher3_test'
+TESTFN = '/tmp/litesync_test'
 from os import unlink
 
 

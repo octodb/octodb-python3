@@ -1,4 +1,4 @@
-from sqlcipher3 import dbapi2 as sqlite
+from litesync import dbapi2 as sqlite
 import unittest
 
 

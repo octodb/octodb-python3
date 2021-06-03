@@ -23,7 +23,7 @@
 
 import datetime
 import unittest
-from sqlcipher3 import dbapi2 as sqlite
+from litesync import dbapi2 as sqlite
 try:
     import zlib
 except ImportError:

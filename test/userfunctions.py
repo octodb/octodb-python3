@@ -24,7 +24,7 @@
 
 import unittest
 import unittest.mock
-from sqlcipher3 import dbapi2 as sqlite
+from litesync import dbapi2 as sqlite
 
 def func_returntext():
     return "foo"
