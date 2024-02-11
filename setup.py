@@ -13,7 +13,7 @@ from setuptools import Extension
 # If you need to change anything, it should be enough to change setup.cfg.
 
 PACKAGE_NAME = 'octodb'
-VERSION = '0.4.8'
+VERSION = '0.4.9'
 
 # define sqlite sources
 sources = [os.path.join('src', source)

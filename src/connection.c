@@ -250,7 +250,13 @@ void pysqlite_connection_dealloc(pysqlite_Connection* self)
 
     /* Clean up if user has not called .close() explicitly. */
     if (self->db) {
+      if (_Py_IsFinalizing()) {
         sqlite3_close_v2(self->db);
+      } else {
+        Py_BEGIN_ALLOW_THREADS
+        sqlite3_close_v2(self->db);
+        Py_END_ALLOW_THREADS
+      }
     }
 
     Py_XDECREF(self->isolation_level);
@@ -424,7 +430,9 @@ PyObject* pysqlite_connection_close(pysqlite_Connection* self, PyObject* args)
     pysqlite_close_all_blobs(self);
 
     if (self->db) {
+        Py_BEGIN_ALLOW_THREADS
         rc = sqlite3_close_v2(self->db);
+        Py_END_ALLOW_THREADS
 
         if (rc != SQLITE_OK) {
             _pysqlite_seterror(self->db);
