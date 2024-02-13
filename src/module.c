@@ -50,7 +50,7 @@ PyObject *pysqlite_NotSupportedError = NULL;
 PyObject *pysqlite_error_callback = NULL;
 
 PyObject* _pysqlite_converters = NULL;
-int _pysqlite_enable_callback_tracebacks = 0;
+int _pysqlite_enable_callback_tracebacks = 1;
 int pysqlite_BaseTypeAdapted = 0;
 
 static PyObject* module_connect(PyObject* self, PyObject* args, PyObject*
