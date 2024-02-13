@@ -47,6 +47,8 @@ PyObject *pysqlite_IntegrityError = NULL;
 PyObject *pysqlite_DataError = NULL;
 PyObject *pysqlite_NotSupportedError = NULL;
 
+PyObject *pysqlite_error_callback = NULL;
+
 PyObject* _pysqlite_converters = NULL;
 int _pysqlite_enable_callback_tracebacks = 0;
 int pysqlite_BaseTypeAdapted = 0;
@@ -220,6 +222,63 @@ PyDoc_STRVAR(module_register_converter_doc,
 \n\
 Registers a converter with pysqlite. Non-standard.");
 
+static void _error_callback(void* user_arg, int error_code, const char* error_message)
+{
+    PyObject *ret = NULL;
+
+    PyGILState_STATE gilstate;
+    gilstate = PyGILState_Ensure();
+
+    if (error_message == NULL) error_message = "";
+
+    ret = PyObject_CallFunction(pysqlite_error_callback, "is", error_code, error_message);
+
+    if (ret) {
+        Py_DECREF(ret);
+    } else {
+        if (_pysqlite_enable_callback_tracebacks) {
+            PyErr_Print();
+        } else {
+            PyErr_Clear();
+        }
+    }
+
+    PyGILState_Release(gilstate);
+}
+
+static PyObject* module_set_error_callback(PyObject* self, PyObject* args, PyObject* kwargs)
+{
+    PyObject* error_callback = NULL;
+
+    static char *kwlist[] = { "error_callback", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:set_error_callback",
+                                     kwlist, &error_callback)) {
+        return NULL;
+    }
+
+    if (pysqlite_error_callback != NULL) {
+        Py_DECREF(pysqlite_error_callback);
+        pysqlite_error_callback = NULL;
+    }
+
+    if (error_callback == Py_None) {
+        /* None clears the error callback previously set */
+        sqlite3_config(SQLITE_CONFIG_LOG, NULL, NULL);
+    } else {
+        sqlite3_config(SQLITE_CONFIG_LOG, _error_callback, NULL);
+        pysqlite_error_callback = error_callback;
+        Py_INCREF(pysqlite_error_callback);
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(set_error_callback_doc,
+"set_error_callback(error_callback)\n\
+\n\
+Sets an error log callback called for each error on all open connections. Non-standard.");
+
 static PyObject* enable_callback_tracebacks(PyObject* self, PyObject* args)
 {
     if (!PyArg_ParseTuple(args, "i", &_pysqlite_enable_callback_tracebacks)) {
@@ -261,6 +320,8 @@ static PyMethodDef module_methods[] = {
      pysqlite_adapt_doc},
     {"enable_callback_tracebacks",  (PyCFunction)enable_callback_tracebacks,
      METH_VARARGS, enable_callback_tracebacks_doc},
+    {"set_error_callback", (PyCFunction)(void(*)(void))module_set_error_callback,
+    METH_VARARGS | METH_KEYWORDS, set_error_callback_doc},
     {NULL, NULL}
 };
 
