@@ -13,7 +13,7 @@ from setuptools import Extension
 # If you need to change anything, it should be enough to change setup.cfg.
 
 PACKAGE_NAME = 'octodb'
-VERSION = '0.4.11'
+VERSION = '0.5.0'
 
 # define sqlite sources
 sources = [os.path.join('src', source)
@@ -30,9 +30,8 @@ if sys.platform == "darwin":
     os.environ['CFLAGS'] = "-Qunused-arguments"
     log.info("CFLAGS: " + os.environ['CFLAGS'])
 
-
 def quote_argument(arg):
-    q = '\\"' if sys.platform == 'win32' and sys.version_info < (3, 9) else '"'
+    q = '"'   #if sys.platform == 'win32' and sys.version_info < (3, 8) else '"'
     return q + arg + q
 
 define_macros = [('MODULE_NAME', quote_argument(PACKAGE_NAME + '.dbapi2'))]
@@ -48,6 +47,8 @@ class SystemLibSqliteBuilder(build_ext):
     def build_extension(self, ext):
         log.info(self.description)
         ext.libraries.append('octodb')
+        if sys.platform == "win32":
+            ext.include_dirs.append(".")
         build_ext.build_extension(self, ext)
 
 
@@ -62,7 +63,7 @@ def get_setup_args():
         author_email="contact@octodb.io",
         license="zlib/libpng",
         platforms="ALL",
-        url="https://gitlab.com/octodb/octodb-python3",
+        url="https://github.com/octodb/octodb-python3",
         package_dir={PACKAGE_NAME: "octodb"},
         packages=packages,
         ext_modules=[Extension(
