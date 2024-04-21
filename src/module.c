@@ -50,7 +50,7 @@ PyObject *pysqlite_NotSupportedError = NULL;
 PyObject *pysqlite_error_callback = NULL;
 
 PyObject* _pysqlite_converters = NULL;
-int _pysqlite_enable_callback_tracebacks = 1;
+int _pysqlite_enable_callback_tracebacks = 1; // litesync defaults to print errors emitted on callback functions
 int pysqlite_BaseTypeAdapted = 0;
 
 static PyObject* module_connect(PyObject* self, PyObject* args, PyObject*
@@ -498,6 +498,7 @@ PyMODINIT_FUNC PyInit__sqlite3(void)
     PyObject *module, *dict;
     PyObject *tmp_obj;
     int i;
+
     int rc = sqlite3_initialize();
     if (rc != SQLITE_OK) {
         PyErr_SetString(PyExc_ImportError, sqlite3_errstr(rc));

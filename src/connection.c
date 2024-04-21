@@ -44,6 +44,10 @@
 #define HAVE_BACKUP_API
 #endif
 
+#if SQLITE_VERSION_NUMBER >= 3014002
+#define HAVE_TRACE_V2
+#endif
+
 #if SQLITE_VERSION_NUMBER >= 3025000
 #define HAVE_WINDOW_FUNCTION
 #endif
@@ -1245,16 +1249,60 @@ static int _progress_handler(void* user_arg)
     return rc;
 }
 
+#ifdef HAVE_TRACE_V2
+static int _trace_callback(unsigned int type, void *ctx, void *stmt, void *sql)
+{
+    if (type != SQLITE_TRACE_STMT) {
+        return 0;
+    }
+
+    PyGILState_STATE gilstate = PyGILState_Ensure();
+    PyObject *py_statement = NULL;
+    const char *expanded_sql = sqlite3_expanded_sql((sqlite3_stmt *)stmt);
+    if (expanded_sql == NULL) {
+        sqlite3 *db = sqlite3_db_handle((sqlite3_stmt *)stmt);
+        if (sqlite3_errcode(db) == SQLITE_NOMEM) {
+            (void)PyErr_NoMemory();
+            goto exit;
+        }
+        PyErr_SetString(pysqlite_DataError, "Expanded SQL string exceeds the maximum string length");
+        if (_pysqlite_enable_callback_tracebacks) {
+            PyErr_Print();
+        } else {
+            PyErr_Clear();
+        }
+
+        py_statement = PyUnicode_FromString((const char *)sql);
+    } else {
+        py_statement = PyUnicode_FromString(expanded_sql);
+        sqlite3_free((void *)expanded_sql);
+    }
+
+    if (py_statement) {
+        PyObject *ret = PyObject_CallFunctionObjArgs((PyObject*)ctx, py_statement, NULL);
+        Py_DECREF(py_statement);
+        Py_XDECREF(ret);
+    }
+
+    if (PyErr_Occurred()) {
+        if (_pysqlite_enable_callback_tracebacks) {
+            PyErr_Print();
+        } else {
+            PyErr_Clear();
+        }
+    }
+exit:
+    PyGILState_Release(gilstate);
+    return 0;
+}
+#else
 static void _trace_callback(void* user_arg, const char* statement_string)
 {
     PyObject *py_statement = NULL;
     PyObject *ret = NULL;
 
-    PyGILState_STATE gilstate;
-
-    gilstate = PyGILState_Ensure();
-    py_statement = PyUnicode_DecodeUTF8(statement_string,
-            strlen(statement_string), "replace");
+    PyGILState_STATE gilstate = PyGILState_Ensure();
+    py_statement = PyUnicode_FromString(statement_string);
     if (py_statement) {
         ret = PyObject_CallFunctionObjArgs((PyObject*)user_arg, py_statement, NULL);
         Py_DECREF(py_statement);
@@ -1272,13 +1320,13 @@ static void _trace_callback(void* user_arg, const char* statement_string)
 
     PyGILState_Release(gilstate);
 }
+#endif
 
 static PyObject* pysqlite_connection_set_authorizer(pysqlite_Connection* self, PyObject* args, PyObject* kwargs)
 {
     PyObject* authorizer_cb;
 
     static char *kwlist[] = { "authorizer_callback", NULL };
-    int rc;
 
     if (!pysqlite_check_thread(self) || !pysqlite_check_connection(self)) {
         return NULL;
@@ -1289,14 +1337,21 @@ static PyObject* pysqlite_connection_set_authorizer(pysqlite_Connection* self, P
         return NULL;
     }
 
-    rc = sqlite3_set_authorizer(self->db, _authorizer_callback, (void*)authorizer_cb);
+    int rc;
+    if (authorizer_cb == Py_None) {
+        rc = sqlite3_set_authorizer(self->db, NULL, NULL);
+        Py_XSETREF(self->function_pinboard_authorizer_cb, NULL);
+    }
+    else {
+        Py_INCREF(authorizer_cb);
+        Py_XSETREF(self->function_pinboard_authorizer_cb, authorizer_cb);
+        rc = sqlite3_set_authorizer(self->db, _authorizer_callback, (void*)authorizer_cb);
+    }
+
     if (rc != SQLITE_OK) {
         PyErr_SetString(pysqlite_OperationalError, "Error setting authorizer callback");
         Py_XSETREF(self->function_pinboard_authorizer_cb, NULL);
         return NULL;
-    } else {
-        Py_INCREF(authorizer_cb);
-        Py_XSETREF(self->function_pinboard_authorizer_cb, authorizer_cb);
     }
     Py_RETURN_NONE;
 }
@@ -1347,10 +1402,18 @@ static PyObject* pysqlite_connection_set_trace_callback(pysqlite_Connection* sel
 
     if (trace_callback == Py_None) {
         /* None clears the trace callback previously set */
+#ifdef HAVE_TRACE_V2
+        sqlite3_trace_v2(self->db, SQLITE_TRACE_STMT, NULL, (void*)0);
+#else
         sqlite3_trace(self->db, 0, (void*)0);
+#endif
         Py_XSETREF(self->function_pinboard_trace_callback, NULL);
     } else {
+#ifdef HAVE_TRACE_V2
+        sqlite3_trace_v2(self->db, SQLITE_TRACE_STMT, _trace_callback, trace_callback);
+#else
         sqlite3_trace(self->db, _trace_callback, trace_callback);
+#endif
         Py_INCREF(trace_callback);
         Py_XSETREF(self->function_pinboard_trace_callback, trace_callback);
     }
